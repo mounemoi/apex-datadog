@@ -1,5 +1,5 @@
 {
-    "description": "aws-ec2-counter",
+    "description": "ec2-counter",
     "memory": 128,
     "timeout": 60,
     "hooks":{
