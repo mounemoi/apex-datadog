@@ -8,7 +8,7 @@
     "environment": {
         "PYTHONPATH": "/var/runtime:/var/task/site-packages",
 
-        "METRICS_NAME": "test.aws_ebs_burst_balance",
+        "METRICS_NAME": "aws_ebs_burst_balance",
         "REGION": "ap-northeast-1"
     }
 }
