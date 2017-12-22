@@ -4,5 +4,9 @@
   "memory": 128,
   "timeout": 5,
   "role": "arn:aws:iam::******:role/datadog_lambda_function",
-  "environment": {},
+  "environment": {
+    "DD_API_KEY": "",
+    "DD_APP_KEY": ""
+  },
+  "runtime": "python3.6"
 }
