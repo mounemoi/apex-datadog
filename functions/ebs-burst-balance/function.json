@@ -1,6 +1,6 @@
 {
     "description": "ebs-burst-balance",
-    "memory": 128,
+    "memory": 256,
     "timeout": 120,
     "hooks":{
         "build": "pip install -r requirements.txt -t ./site-packages"
