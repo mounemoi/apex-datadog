@@ -328,13 +328,14 @@ class AwsEc2Count():
         }
         datadog.initialize(**dd_options)
 
-        self.__now            = time.time()
         self.__region         = config['region']
         self.__metrics_prefix = config['metrics_prefix']
 
         self.__metrics = []
 
     def check(self):
+        self.__now = time.time()
+
         fetcher = InstanceFetcher(self.__region)
 
         reserved_instances = fetcher.get_reserved_instances()
