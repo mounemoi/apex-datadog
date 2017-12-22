@@ -1,7 +1,20 @@
 # -*- coding: utf-8 -*-
-from checks import AgentCheck
+import os
+import time
+import datadog
 from boto3.session import Session
 from collections import OrderedDict
+
+
+def handle(event, context):
+    config = {
+        'dd_api_key'     : os.environ['DD_API_KEY'],
+        'dd_app_key'     : os.environ['DD_APP_KEY'],
+        'metrics_prefix' : os.environ['METRICS_PREFIX'],
+        'region'         : os.environ['REGION'],
+    }
+    agent = AwsEc2Count(config)
+    agent.check()
 
 
 class NormalizationFactor():
@@ -307,53 +320,67 @@ class InstanceFetcher():
         return ondemand_instances, unused_instances
 
 
-class AwsEc2Count(AgentCheck):
-    def check(self, config):
-        if 'region' not in config:
-            self.log.error('no region')
-            return
+class AwsEc2Count():
+    def __init__(self, config):
+        dd_options = {
+            'api_key': config['dd_api_key'],
+            'app_key': config['dd_app_key'],
+        }
+        datadog.initialize(**dd_options)
 
-        fetcher = InstanceFetcher(config['region'])
+        self.__now            = time.time()
+        self.__region         = config['region']
+        self.__metrics_prefix = config['metrics_prefix']
+
+        self.__metrics = []
+
+    def check(self):
+        fetcher = InstanceFetcher(self.__region)
 
         reserved_instances = fetcher.get_reserved_instances()
         if reserved_instances is None:
             return
-        self.__send_instance_info('reserved', reserved_instances)
+        self.__set_instance_info('reserved', reserved_instances)
 
         running_instances = fetcher.get_running_instances()
-        self.__send_instance_info('running', running_instances)
+        self.__set_instance_info('running', running_instances)
 
         ondemand_instances, unused_instances = fetcher.get_ondemand_instances(running_instances, reserved_instances)
-        self.__send_instance_info('ondemand', ondemand_instances)
-        self.__send_instance_info('reserved_unused', unused_instances)
+        self.__set_instance_info('ondemand', ondemand_instances)
+        self.__set_instance_info('reserved_unused', unused_instances)
 
-    def __send_instance_info(self, category, instances):
-        self.log.info(category)
+        self.__send_metrics()
+
+    def __set_instance_info(self, category, instances):
+        print(category)
         for instance in instances.dump():
-            self.log.info('{az} : {itype} = {count} ({footprint})'.format(**instance))
-            self.__send_count(category, instance)
+            print('{az} : {itype} = {count} ({footprint})'.format(**instance))
+            self.__set_count(category, instance)
 
-    def __send_count(self, category, instance):
+    def __set_count(self, category, instance):
         tags = [
             'ac-az:{az}'.format(**instance),
             'ac-type:{itype}'.format(**instance),
             'ac-family:{family}'.format(**instance),
         ]
-        self.__send_gauge(
+        self.__set_gauge(
             '{}.count'.format(category),
             instance['count'],
             tags,
         )
-        self.__send_gauge(
+        self.__set_gauge(
             '{}.footprint'.format(category),
             instance['footprint'],
             tags,
         )
 
-    def __send_gauge(self, metric, value, tags):
-        prefix = self.init_config.get('metrics_prefix', 'aws_ec2_count')
-        self.gauge(
-            prefix + '.' + metric,
-            value,
-            tags=tags
-        )
+    def __set_gauge(self, metric, value, tags):
+        metric = self.__metrics_prefix + '.' + metric
+        self.__metrics.append({
+            'metric': metric,
+            'points': (self.__now, value),
+            'tags'  : tags,
+        })
+
+    def __send_metrics(self):
+        datadog.api.Metric.send(self.__metrics)

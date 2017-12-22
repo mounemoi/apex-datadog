@@ -1,0 +1,14 @@
+{
+    "description": "aws-ec2-counter",
+    "memory": 128,
+    "timeout": 60,
+    "hooks":{
+        "build": "pip install -r requirements.txt -t ./site-packages"
+    },
+    "environment": {
+        "PYTHONPATH": "/var/runtime:/var/task/site-packages",
+
+        "METRICS_PREFIX": "aws_ec2_count",
+        "REGION": "ap-northeast-1"
+    }
+}
