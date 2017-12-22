@@ -1,0 +1,8 @@
+{
+  "name": "datadog",
+  "description": "",
+  "memory": 128,
+  "timeout": 5,
+  "role": "arn:aws:iam::******:role/datadog_lambda_function",
+  "environment": {},
+}
