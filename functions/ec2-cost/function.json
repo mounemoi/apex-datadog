@@ -1,0 +1,14 @@
+{
+    "description": "ec2-cost",
+    "memory": 128,
+    "timeout": 60,
+    "hooks":{
+        "build": "pip install -r requirements.txt -t ./site-packages"
+    },
+    "environment": {
+        "PYTHONPATH": "/var/runtime:/var/task/site-packages",
+
+        "METRICS_PREFIX": "aws_ec2_cost",
+        "REGION": "ap-northeast-1"
+    }
+}
