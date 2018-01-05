@@ -114,9 +114,13 @@ class InstanceCounter():
     def __tag_encode(self, tags):
         tag_text = ''
         for key in self.__tag_keys:
-            if key not in tags:
-                raise TypeError('undefined tag value : {}'.format(key))
-            tag_text += "{}\t".format(tags[key])
+            name = ''
+            if key in tags:
+                name = tags[key]
+            else:
+                name = 'UNKNOWN'
+
+            tag_text += "{}\t".format(name)
 
         return tag_text
 
