@@ -92,6 +92,7 @@ class EBSBurstBalance():
                 value = 100.0
 
             metrics.append({
+                'host'  : 'dummy.example.com',
                 'metric': self.__metrics_name,
                 'points': (now, value),
                 'tags'  : [

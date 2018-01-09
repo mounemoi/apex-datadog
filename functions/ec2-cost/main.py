@@ -232,6 +232,7 @@ class AwsEc2Cost():
     def __set_gauge(self, metric, value, tags):
         metric = self.__metrics_prefix + '.' + metric
         self.__metrics.append({
+            'host'  : 'dummy.example.com',
             'metric': metric,
             'points': (self.__now, value),
             'tags'  : tags,
